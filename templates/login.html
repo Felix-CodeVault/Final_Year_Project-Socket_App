@@ -1,0 +1,22 @@
+{% extends 'base.html' %} {% block content %}
+<form method="post" class="white-container">
+    <h3>PictionAIry</h3>
+    <div>
+        <input
+                type="text"
+                placeholder="Username"
+                style="text-align: center"
+                name="name"
+                value="{{name}}"
+        />
+        <br>
+        <br>
+        <button>Enter</button>
+    </div>
+    {% if error %}
+    <ul>
+        <li>{{error}}</li>
+    </ul>
+    {% endif %}
+</form>
+{% endblock %}
