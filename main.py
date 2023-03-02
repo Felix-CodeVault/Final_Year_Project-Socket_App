@@ -28,11 +28,39 @@ def login():
         name = request.form.get("name")
 
         if not name:
-            return render_template("home.html", error="Enter a Name", name=name)
+            return render_template("login.html", error="Enter a Name", name=name)
 
-        return redirect(url_for("room"))
+        session["name"] = name
+        print("User Created: ", name)
+        return redirect(url_for("home"))
 
     return render_template("login.html")
+
+
+@app.route("/home", methods=["POST", "GET"])
+def home():
+    name = session["name"]
+    if request.method == "POST":
+        code = request.form.get("code")
+        join = request.form.get("join", False)
+        create = request.form.get("create", False)
+
+        # for joining a room
+        if join != False and not code:
+            render_template("home.html", error="Enter room code", code=code, name=name)
+
+        room = code
+        if create != False:
+            room = generate_unique_code(5)
+            rooms[room] = {"members": 0, "messages": []}
+            print(room)
+        elif code not in rooms:
+            return render_template("home.html", error="Room doesn't exist", code=code, name=name)
+
+        session["room"] = room
+        return redirect(url_for("room"))
+
+    return render_template("home.html", name=name)
 
 
 @app.route("/room")

@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block content %}
+<form method="post" class="white-container">
+    <h1>Welcome, {{name}}!</h1>
+    <div>
+        <label>Join a Game</label>
+        <br>
+        <input type="text"
+               placeholder="Game Code"
+               style="text-align: center"
+               name="code"
+               value="{{code}}"
+        >
+        <br>
+        <button type="submit" name="join">Join</button>
+    </div>
+    {% if error %}
+    <ul>
+        <li>{{error}}</li>
+    </ul>
+    {% endif %}
+
+    <div>
+        <label>Create a Game</label>
+        <br>
+        <button type="submit" name="create">Create a Game</button>
+    </div>
+</form>
+
+{% endblock %}
