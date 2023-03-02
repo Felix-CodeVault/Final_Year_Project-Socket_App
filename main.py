@@ -20,6 +20,9 @@ def generate_unique_code(length):
             break
     return code
 
+@app.route("/x")
+def game():
+    return render_template("game_room.html")
 
 @app.route("/", methods=["POST", "GET"])
 def login():
@@ -53,7 +56,6 @@ def home():
         if create != False:
             room = generate_unique_code(5)
             rooms[room] = {"members": 0, "messages": []}
-            print(room)
         elif code not in rooms:
             return render_template("home.html", error="Room doesn't exist", code=code, name=name)
 

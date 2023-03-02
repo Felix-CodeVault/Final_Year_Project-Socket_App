@@ -54,11 +54,12 @@
     border-style: solid;
     border-radius: 10px;
     background-color: whitesmoke;
-    height: 80vh;
+    height: 30vh;
     display: flex;
     flex-direction: column;
-    width: 80vw;
+    width: 25vw;
     align-items: stretch;
+    overflow: auto;
 }
 
 .messages {
@@ -92,4 +93,9 @@ h2 {
 .muted {
     font-size: 10px;
     color: darkgray;
+}
+
+.canvas{
+    border: black;
+    background-color: white;
 }
