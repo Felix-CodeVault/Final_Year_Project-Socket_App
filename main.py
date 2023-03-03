@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask_socketio import join_room, leave_room, send, SocketIO
+from flask_socketio import join_room, leave_room, send, emit, SocketIO
 import random
 from string import ascii_uppercase
 
@@ -20,9 +20,11 @@ def generate_unique_code(length):
             break
     return code
 
+
 @app.route("/x")
 def game():
     return render_template("game_room.html")
+
 
 @app.route("/", methods=["POST", "GET"])
 def login():
@@ -118,6 +120,11 @@ def disconnect():
 
     send({"name": name, "message": "has left the room"}, to=room)
     print(f"{name} left room {room}")
+
+
+@socketio.on("canvas_data")
+def handle_canvas_data(data):
+    emit("canvas_data", data, broadcast=True, include_self=False)
 
 
 if __name__ == "__main__":
