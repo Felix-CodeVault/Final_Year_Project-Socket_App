@@ -127,5 +127,10 @@ def handle_canvas_data(data):
     emit("canvas_data", data, broadcast=True, include_self=False)
 
 
+@socketio.on("canvas_data_player_2")
+def handle_canvas_data_player_2(data):
+    emit("canvas_data_player_2", data, broadcast=True, include_self=False)
+
+
 if __name__ == "__main__":
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True)

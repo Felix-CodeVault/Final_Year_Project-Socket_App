@@ -14,7 +14,6 @@
                     document.getElementById("send-btn").click();
                     updateScroll();
                 }
-
             });
         </script>
     </div>
@@ -22,6 +21,10 @@
 
 <div class="canvas">
     <canvas id="canvas" width="400" height="400"></canvas>
+</div>
+
+<div class="canvas">
+    <canvas id="canvas-player-2" width="400" height="400"></canvas>
 </div>
 
 <script type="text/javascript">
@@ -99,6 +102,43 @@
         };
         img.src = canvasData;
     })
+
+    var canvas_player_2 = document.getElementById("canvas-player-2");
+    var ctx_player_2 = canvas_player_2.getContext("2d");
+    var isDrawing_player_2 = false;
+
+    canvas_player_2.addEventListener("mousedown", startDrawing_player_2);
+    canvas_player_2.addEventListener("mouseup", stopDrawing_player_2);
+    canvas_player_2.addEventListener("mousemove", draw_player_2);
+
+    function startDrawing_player_2(event) {
+        isDrawing_player_2 = true;
+        ctx_player_2.beginPath();
+        ctx_player_2.moveTo(event.clientX - canvas_player_2.offsetLeft, event.clientY - canvas_player_2.offsetTop);
+    }
+
+    function stopDrawing_player_2(event) {
+        isDrawing_player_2 = false;
+    }
+
+    function draw_player_2(event) {
+        if (!isDrawing_player_2) return;
+
+        ctx_player_2.lineTo(event.clientX - canvas_player_2.offsetLeft, event.clientY - canvas_player_2.offsetTop);
+        ctx_player_2.stroke();
+
+        var canvasData_player_2 = canvas_player_2.toDataURL();
+        socketio.emit("canvas_data_player_2", canvasData_player_2);
+    }
+
+    socketio.on("canvas_data_player_2", function (canvasData_player_2) {
+        var img_player_2 = new Image();
+        img_player_2.onload = function () {
+            ctx_player_2.drawImage(img_player_2, 0, 0);
+        };
+        img_player_2.src = canvasData_player_2;
+    })
+
 </script>
 
 {% for msg in messages %}
