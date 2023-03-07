@@ -1,11 +1,14 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_socketio import join_room, leave_room, send, emit, SocketIO
 import random
+import requests
 from string import ascii_uppercase
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "sdasd"
 socketio = SocketIO(app)
+
+url_endpoint = "https://abidlabs-draw.hf.space/+/api/predict/"
 
 rooms = {}
 
@@ -21,7 +24,7 @@ def generate_unique_code(length):
     return code
 
 
-@app.route("/x")
+@app.route("/game")
 def game():
     return render_template("game_room.html")
 
@@ -124,11 +127,17 @@ def disconnect():
 
 @socketio.on("canvas_data")
 def handle_canvas_data(data):
+    # TODO: deals with drawing recognition
+
+    # send data to all canvases
     emit("canvas_data", data, broadcast=True, include_self=False)
 
 
 @socketio.on("canvas_data_player_2")
 def handle_canvas_data_player_2(data):
+    # TODO: deals with drawing recognition
+
+    # send data to all canvases
     emit("canvas_data_player_2", data, broadcast=True, include_self=False)
 
 
