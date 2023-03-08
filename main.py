@@ -1,3 +1,5 @@
+import time
+
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_socketio import join_room, leave_room, send, emit, SocketIO
 import random
@@ -82,9 +84,13 @@ def prep_zone():
     if request.method == "POST":
         play = request.form.get("play-btn", False)
         if play != False:
-            socketio.emit("redirect_to_game")
-            return redirect(url_for("room"))
-    return render_template("prep_zone.html", code=room)
+            if rooms[room]["members"] == 2:
+                print(rooms[room]["members"])
+                return redirect(url_for("room"))
+            else:
+                return render_template("prep_zone.html", code=room, error="Second Player Needed",
+                                       messages=rooms[room]["messages"])
+    return render_template("prep_zone.html", code=room, messages=rooms[room]["messages"])
 
 
 @app.route("/room")
@@ -93,11 +99,6 @@ def room():
     # if room is None or session.get("name") is None or room not in rooms:
     #     return redirect(url_for("home"))
     return render_template("room.html", messages=rooms[room]["messages"])
-
-
-@socketio.on("redirect")
-def redirect_to_game():
-    return redirect(url_for("room"))
 
 
 @socketio.on("message")
@@ -129,22 +130,24 @@ def connect(auth):
     join_room(room)
     send({"name": name, "message": "has entered the room"}, to=room)
     rooms[room]["members"] += 1
-    print(f"{name} joined room {room}")
+    print(f"{name} connected to room {room}")
 
 
 @socketio.on("disconnect")
 def disconnect():
     room = session.get("room")
     name = session.get("name")
+    time.sleep(1)
     leave_room(room)
 
     if room in rooms:
         rooms[room]["members"] -= 1
+        time.sleep(5)
         if rooms[room]["members"] <= 0:
             del rooms[room]
 
     send({"name": name, "message": "has left the room"}, to=room)
-    print(f"{name} left room {room}")
+    print(f"{name} disconnected from room {room}")
 
 
 @socketio.on("canvas_data")
