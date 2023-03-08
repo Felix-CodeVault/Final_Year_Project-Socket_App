@@ -1,0 +1,23 @@
+{% extends "base.html" %} {% block content %}
+
+    <form method="post">
+        <div class="white-container">
+            <h2>{{ code }}</h2>
+            <button name="play-btn" id="play-btn">Play</button>
+            {% if error %}
+                <ul>
+                    <li>{{ error }}</li>
+                </ul>
+            {% endif %}
+        </div>
+    </form>
+
+    <script type="text/javascript">
+        var socketio = io();
+
+        var redirect_button = document.getElementById("play-btn");
+        socketio.emit("redirect");
+
+    </script>
+
+{% endblock %}

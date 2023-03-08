@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_socketio import join_room, leave_room, send, emit, SocketIO
 import random
-import requests
 from string import ascii_uppercase
 
 app = Flask(__name__)
@@ -64,18 +63,41 @@ def home():
         elif code not in rooms:
             return render_template("home.html", error="Room doesn't exist", code=code, name=name)
 
+        if rooms[room]["members"] >= 2:
+            return render_template("home.html", error="Room at Max Capacity", code=code, name=name)
+
         session["room"] = room
-        return redirect(url_for("room"))
+        print(room)
+        return redirect(url_for("prep_zone"))
 
     return render_template("home.html", name=name)
+
+
+@app.route("/prep_zone", methods=["POST", "GET"])
+def prep_zone():
+    room = session.get("room")
+    if room is None or session.get("name") is None or room not in rooms:
+        return redirect(url_for("home"))
+
+    if request.method == "POST":
+        play = request.form.get("play-btn", False)
+        if play != False:
+            socketio.emit("redirect_to_game")
+            return redirect(url_for("room"))
+    return render_template("prep_zone.html", code=room)
 
 
 @app.route("/room")
 def room():
     room = session.get("room")
-    if room is None or session.get("name") is None or room not in rooms:
-        return redirect(url_for("home"))
-    return render_template("room.html", code=room, messages=rooms[room]["messages"])
+    # if room is None or session.get("name") is None or room not in rooms:
+    #     return redirect(url_for("home"))
+    return render_template("room.html", messages=rooms[room]["messages"])
+
+
+@socketio.on("redirect")
+def redirect_to_game():
+    return redirect(url_for("room"))
 
 
 @socketio.on("message")
