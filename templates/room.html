@@ -1,52 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="row">
-    <div class="column">
-        <div class="canvas">
-            <canvas id="canvas" width="400" height="400"></canvas>
+    <div class="row">
+        <div class="column">
+            <div class="canvas">
+                <canvas id="canvas" width="400" height="400"></canvas>
+            </div>
         </div>
-    </div>
 
-    <div class="column">
-        <div class="wordToDraw">
-            <h2>Chair</h2>
+        <div class="column">
+            <div class="wordToDraw">
+                <h2>Chair</h2>
+            </div>
+            <div class="message-box" id="message-box">
+                <br>
+                <div class="messages" id="messages"></div>
+                <div class="inputs">
+                    <input type="text" rows="3" placeholder="Message" id="message">
+                    <button type="button" name="send" id="send-btn" onclick="sendMessage()">Send</button>
+                    <script>
+                        var input = document.getElementById("message");
+                        input.addEventListener("keypress", function (event) {
+                            if (event.key === "Enter") {
+                                event.preventDefault();
+                                document.getElementById("send-btn").click();
+                                updateScroll();
+                            }
+                        });
+                    </script>
+                </div>
+            </div>
         </div>
-        <div class="message-box" id="message-box">
-            <br>
-            <div class="messages" id="messages"></div>
-            <div class="inputs">
-                <input type="text" rows="3" placeholder="Message" id="message">
-                <button type="button" name="send" id="send-btn" onclick="sendMessage()">Send</button>
-                <script>
-                    var input = document.getElementById("message");
-                    input.addEventListener("keypress", function (event) {
-                        if (event.key === "Enter") {
-                            event.preventDefault();
-                            document.getElementById("send-btn").click();
-                            updateScroll();
-                        }
-                    });
-                </script>
+
+        <div class="column">
+            <div class="canvas">
+                <canvas id="canvas-player-2" width="400" height="400"></canvas>
             </div>
         </div>
     </div>
 
-    <div class="column">
-        <div class="canvas">
-            <canvas id="canvas-player-2" width="400" height="400"></canvas>
-        </div>
-    </div>
-</div>
 
+    <script type="text/javascript">
+        var socketio = io();
 
-<script type="text/javascript">
-    var socketio = io();
+        const messages = document.getElementById("messages");
 
-    const messages = document.getElementById("messages");
-
-    const createMessage = (name, msg) => {
-        const content = `
+        const createMessage = (name, msg) => {
+            const content = `
         <div class="text">
             <div>
                 <span>
@@ -59,107 +59,106 @@
         </div>
         `;
 
-        messages.innerHTML += content;
-        updateScroll();
-    };
-
-    socketio.on("message", (data) => {
-        createMessage(data.name, data.message)
-    })
-
-    const sendMessage = () => {
-        const message = document.getElementById("message")
-        if (message.value === "") return;
-        socketio.emit("message", {data: message.value});
-        message.value = "";
-    };
-
-    function updateScroll() {
-        var element = document.getElementById("messages");
-        var box = document.getElementById("message")
-        element.scrollTop = element.scrollHeight;
-    }
-
-    var canvas = document.getElementById("canvas");
-    var ctx = canvas.getContext("2d");
-    var isDrawing = false;
-
-    canvas.addEventListener("mousedown", startDrawing);
-    canvas.addEventListener("mouseup", stopDrawing);
-    canvas.addEventListener("mousemove", draw);
-
-    function startDrawing(event) {
-        isDrawing = true;
-        ctx.beginPath();
-        ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
-    }
-
-    function stopDrawing(event) {
-        isDrawing = false;
-    }
-
-    function draw(event) {
-        if (!isDrawing) return;
-
-        ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop)
-        ctx.stroke()
-
-        var canvasData = canvas.toDataURL();
-        socketio.emit("canvas_data", canvasData)
-    }
-
-    socketio.on("canvas_data", function (canvasData) {
-        var img = new Image();
-        img.onload = function () {
-            ctx.drawImage(img, 0, 0);
+            messages.innerHTML += content;
+            updateScroll();
         };
-        img.src = canvasData;
-    })
 
-    var canvas_player_2 = document.getElementById("canvas-player-2");
-    var ctx_player_2 = canvas_player_2.getContext("2d");
-    var isDrawing_player_2 = false;
+        socketio.on("message", (data) => {
+            createMessage(data.name, data.message)
+        })
 
-    canvas_player_2.addEventListener("mousedown", startDrawing_player_2);
-    canvas_player_2.addEventListener("mouseup", stopDrawing_player_2);
-    canvas_player_2.addEventListener("mousemove", draw_player_2);
-
-    function startDrawing_player_2(event) {
-        isDrawing_player_2 = true;
-        ctx_player_2.beginPath();
-        ctx_player_2.moveTo(event.clientX - canvas_player_2.offsetLeft, event.clientY - canvas_player_2.offsetTop);
-    }
-
-    function stopDrawing_player_2(event) {
-        isDrawing_player_2 = false;
-    }
-
-    function draw_player_2(event) {
-        if (!isDrawing_player_2) return;
-
-        ctx_player_2.lineTo(event.clientX - canvas_player_2.offsetLeft, event.clientY - canvas_player_2.offsetTop);
-        ctx_player_2.stroke();
-
-        var canvasData_player_2 = canvas_player_2.toDataURL();
-        socketio.emit("canvas_data_player_2", canvasData_player_2);
-    }
-
-    socketio.on("canvas_data_player_2", function (canvasData_player_2) {
-        var img_player_2 = new Image();
-        img_player_2.onload = function () {
-            ctx_player_2.drawImage(img_player_2, 0, 0);
+        const sendMessage = () => {
+            const message = document.getElementById("message")
+            if (message.value === "") return;
+            socketio.emit("message", {data: message.value});
+            message.value = "";
         };
-        img_player_2.src = canvasData_player_2;
-    })
+
+        function updateScroll() {
+            var element = document.getElementById("messages");
+            var box = document.getElementById("message")
+            element.scrollTop = element.scrollHeight;
+        }
+
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        var isDrawing = false;
+
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mouseup", stopDrawing);
+        canvas.addEventListener("mousemove", draw);
+
+        function startDrawing(event) {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+        }
+
+        function stopDrawing(event) {
+            isDrawing = false;
+        }
+
+        function draw(event) {
+            if (!isDrawing) return;
+
+            ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop)
+            ctx.stroke()
+
+            var canvasData = canvas.toDataURL();
+            socketio.emit("canvas_data", canvasData)
+        }
+
+        socketio.on("canvas_data", function (canvasData) {
+            var img = new Image();
+            img.onload = function () {
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = canvasData;
+        })
+
+        var canvas_player_2 = document.getElementById("canvas-player-2");
+        var ctx_player_2 = canvas_player_2.getContext("2d");
+        var isDrawing_player_2 = false;
+
+        canvas_player_2.addEventListener("mousedown", startDrawing_player_2);
+        canvas_player_2.addEventListener("mouseup", stopDrawing_player_2);
+        canvas_player_2.addEventListener("mousemove", draw_player_2);
+
+        function startDrawing_player_2(event) {
+            isDrawing_player_2 = true;
+            ctx_player_2.beginPath();
+            ctx_player_2.moveTo(event.clientX - canvas_player_2.offsetLeft, event.clientY - canvas_player_2.offsetTop);
+        }
+
+        function stopDrawing_player_2(event) {
+            isDrawing_player_2 = false;
+        }
+
+        function draw_player_2(event) {
+            if (!isDrawing_player_2) return;
+
+            ctx_player_2.lineTo(event.clientX - canvas_player_2.offsetLeft, event.clientY - canvas_player_2.offsetTop);
+            ctx_player_2.stroke();
+
+            var canvasData_player_2 = canvas_player_2.toDataURL();
+            socketio.emit("canvas_data_player_2", canvasData_player_2);
+        }
+
+        socketio.on("canvas_data_player_2", function (canvasData_player_2) {
+            var img_player_2 = new Image();
+            img_player_2.onload = function () {
+                ctx_player_2.drawImage(img_player_2, 0, 0);
+            };
+            img_player_2.src = canvasData_player_2;
+        })
 
 
+    </script>
 
-</script>
-
-{% for msg in messages %}
-<script type="text/javascript">
-    createMessage("{{msg.name}}", "{{msg.message}}");
-</script>
-{% endfor %}
+    {% for msg in messages %}
+        <script type="text/javascript">
+            createMessage("{{msg.name}}", "{{msg.message}}");
+        </script>
+    {% endfor %}
 
 {% endblock %}
